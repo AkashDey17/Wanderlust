@@ -23,7 +23,11 @@ const listingRouter=require("./routes/listing.js");
 const reviewRouter=require("./routes/review.js");
 const userRouter=require("./routes/user.js");
 
-const MONGO_URL="mongodb://127.0.0.1:27017/wanderlust";
+//const MONGO_URL="mongodb://127.0.0.1:27017/wanderlust";
+const dbUrl = process.env.ATLASDB_URL;
+
+
+
 main().then(()=>{
     console.log("Connected to DB");
 }).catch((err)=>{
@@ -31,7 +35,7 @@ main().then(()=>{
 });
 
 async function main(){
-    await mongoose.connect(MONGO_URL);
+    await mongoose.connect(dbUrl);
 };
 
 app.set("view engine","ejs");
@@ -40,6 +44,11 @@ app.use(express.urlencoded({extended:true}));
 app.use(methodOverride("_method"));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname,"public")));
+
+app.use("/listings",listingRouter);
+app.use("/listings/:id/reviews",reviewRouter);
+app.use("/",userRouter);
+
 
 const sessionOptions={
   secret: "mysupersecretcode",
@@ -52,9 +61,9 @@ const sessionOptions={
   },
 };
 
-app.get("/",(req,res)=>{
-  res.send("Hi,I am root");
-});
+// app.get("/",(req,res)=>{
+//   res.send("Hi,I am root");
+// });
 
 app.use(session(sessionOptions));
 app.use(flash());
@@ -75,9 +84,6 @@ app.use((req,res,next)=>{
 
 
 
-app.use("/listings",listingRouter);
-app.use("/listings/:id/reviews",reviewRouter);
-app.use("/",userRouter);
 
 
 
